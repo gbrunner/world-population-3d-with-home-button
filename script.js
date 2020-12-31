@@ -1,36 +1,80 @@
-require([
-        "esri/Map",
-        "esri/views/MapView",
-        "esri/layers/Layer"
-      ], function (Map, MapView, Layer) {
-        var map = new Map({
-          basemap: "gray-vector"
-        });
 
-        var view = new MapView({
-          map: map,
-          container: "viewDiv",
-          zoom: 7,
-          center: [-90, 40]
-        });
+    require([
+      "esri/WebScene",
+      "esri/views/SceneView",
+      "esri/Camera",
+      "esri/widgets/Home",
+      "dojo/domReady!"
+    ], function(WebScene, SceneView, Camera, Home) {
 
-        Layer.fromPortalItem({
-          portalItem: {
-            // autocasts as new PortalItem()
-            /*id: "c0f09a71805f4d45a6b6f3f1e0bdc7fc"*/
-            /*id: "af1ad38816814b7eba3fe74a3b84412d"*/
-            id: "c0238b8ae811443dbe52437496a1a514"
-          }
-        })
-          .then(addLayer)
-          .catch(rejection);
-
-        // Adds the layer to the map once it loads
-        function addLayer(layer) {
-          map.add(layer);
-        }
-
-        function rejection(error) {
-          console.log("Layer failed to load: ", error);
+    
+      /*var map = new Map({
+        basemap: "streets",
+        ground: "world-elevation"
+      });*/
+      var scene = new WebScene({
+        portalItem:{
+         id:"fbbbaa2fbfda41b8b3f96427c3ac5c79" 
         }
       });
+      
+      var camera = new Camera({
+        position: [
+          -75.1652, // lon
+          39.9526, // lat
+          5000000// elevation in meters
+        ],
+        tilt:0,
+        heading: 0
+      })
+
+      var view = new SceneView({
+        container: "viewDiv",
+        map: scene,
+        viewingMode:"global",
+        camera: camera,
+        environment: {
+            lighting: {
+              date: new Date(),
+              directShadowsEnabled: true,
+              // don't update the view time when user pans.
+              // The clock widget drives the time
+              cameraTrackingEnabled: false
+            }
+        },
+    });
+    
+    var homeBtn = new Home({
+        view: view
+      });
+
+      // Add the home button to the top left corner of the view
+    view.ui.add(homeBtn, "top-left");
+    
+    [stl, bei].forEach(function(button) {
+      button.style.display = 'flex';
+      view.ui.add(button, 'top-right');
+    });
+    
+    bei.addEventListener('click', function() {
+      // reuse the default camera position already established in the homeBtn
+      view.goTo({
+        position: {
+          x: 116.4074,
+          y: 39.9042,
+          z: 5000000
+        },
+        tilt: 0,
+        heading: 0
+      });
+    });
+    
+    stl.addEventListener('click', function() {
+      // reuse the default camera position already established in the homeBtn
+      view.goTo({
+        target:camera
+      });
+    });
+
+
+    });
